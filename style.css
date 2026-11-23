@@ -5595,3 +5595,18 @@ a {
     outline: 2px solid #00c8ff;
     outline-offset: 5px;
 }
+
+
+/* FIX: GITHUB PAGES HERO BACKGROUND IMAGES */
+
+.new-hero-slide[data-slide="0"] {
+    background-image: url("hero-background.png") !important;
+}
+
+.new-hero-slide[data-slide="1"] {
+    background-image: url("slide-2-laptop.png") !important;
+}
+
+.new-hero-slide[data-slide="2"] {
+    background-image: url("slide-3-repair.png") !important;
+}
