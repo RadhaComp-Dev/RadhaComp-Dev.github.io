@@ -1,0 +1,1557 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Radha Computers | Admin Dashboard</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://unpkg.com/lucide@latest"></script>
+
+<style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: "Segoe UI", Arial, sans-serif;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+    min-height: 100vh;
+    color: #eaf2ff;
+    background:
+        radial-gradient(circle at top left, #123d70 0, transparent 35%),
+        radial-gradient(circle at bottom right, #092c50 0, transparent 35%),
+        #071426;
+    padding: 30px 5%;
+}
+
+.container { max-width: 1250px; margin: auto; }
+
+.brand {
+    text-align: center;
+    margin-bottom: 35px;
+}
+
+.brand h1 {
+    color: #60a5fa;
+    font-size: 30px;
+    letter-spacing: 2px;
+}
+
+.brand p {
+    color: #a9c6e8;
+    letter-spacing: 3px;
+    font-size: 12px;
+    margin-top: 5px;
+}
+
+.glass {
+    background: rgba(17, 38, 65, 0.82);
+    border: 1px solid rgba(96, 165, 250, 0.22);
+    border-radius: 18px;
+    padding: 25px;
+    box-shadow: 0 10px 35px rgba(0, 0, 0, 0.25);
+    backdrop-filter: blur(12px);
+}
+
+.login-box {
+    max-width: 420px;
+    margin: 70px auto;
+}
+
+.login-box h2 {
+    text-align: center;
+    margin-bottom: 25px;
+    color: #60a5fa;
+}
+
+input, select, textarea {
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 12px;
+    border: 1px solid #31577e;
+    border-radius: 9px;
+    background: #0b1e35;
+    color: white;
+    outline: none;
+}
+
+input:focus, select:focus, textarea:focus {
+    border-color: #60a5fa;
+    box-shadow: 0 0 10px rgba(96, 165, 250, 0.25);
+}
+
+textarea {
+    resize: vertical;
+    min-height: 85px;
+}
+
+button {
+    border: none;
+    border-radius: 8px;
+    padding: 11px 17px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: 0.25s;
+}
+
+button:hover {
+    transform: translateY(-2px);
+    filter: brightness(1.12);
+}
+
+button:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.primary-btn {
+    background: linear-gradient(135deg, #2563eb, #38bdf8);
+    color: white;
+}
+
+.login-btn {
+    width: 100%;
+    padding: 13px;
+}
+
+.dashboard-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin-bottom: 25px;
+}
+
+.dashboard-header h2 { color: #60a5fa; }
+
+.header-actions {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.refresh-btn { background: #164e80; color: white; }
+.logout-btn { background: #991b1b; color: white; }
+
+.stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 18px;
+    margin-bottom: 30px;
+}
+
+.stat-card {
+    padding: 23px;
+    border-radius: 15px;
+    background: linear-gradient(145deg, #102c4d, #0b1d33);
+    border: 1px solid rgba(96, 165, 250, 0.2);
+    transition: 0.3s;
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+}
+
+.stat-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 8px 25px rgba(37, 99, 235, 0.25);
+    border-color: rgba(96, 165, 250, 0.55);
+}
+
+.stat-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+}
+
+.stat-card p { color: #a9c6e8; font-size: 14px; }
+
+.stat-card h2 {
+    margin-top: 16px;
+    font-size: 32px;
+    color: #60a5fa;
+}
+
+.stat-hint {
+    display: block;
+    margin-top: 10px;
+    color: #7899bd;
+    font-size: 11px;
+}
+
+.stat-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 13px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.stat-icon svg {
+    width: 25px;
+    height: 25px;
+    stroke-width: 2;
+}
+
+.icon-total { color: #60a5fa; background: rgba(37,99,235,.17); }
+.icon-pending { color: #facc15; background: rgba(250,204,21,.13); }
+.icon-approved { color: #4ade80; background: rgba(74,222,128,.13); }
+.icon-rejected { color: #f87171; background: rgba(248,113,113,.13); }
+
+/* REVIEW SECTION */
+
+.reviews-panel {
+    margin-top: 20px;
+    scroll-margin-top: 25px;
+}
+
+.reviews-heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.reviews-heading h2 { color: #60a5fa; }
+
+.tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.tab-btn {
+    background: #142d4a;
+    color: #cbdcf0;
+    border: 1px solid #31577e;
+}
+
+.tab-btn.active {
+    background: #2563eb;
+    color: white;
+    border-color: #60a5fa;
+}
+
+.review-card {
+    background: rgba(7,25,45,.8);
+    border: 1px solid rgba(96,165,250,.18);
+    border-radius: 13px;
+    padding: 20px;
+    margin-bottom: 15px;
+}
+
+.review-top {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 12px;
+}
+
+.review-card h3 { color: #bfdbfe; margin-bottom: 6px; }
+
+.stars { color: #fbbf24; letter-spacing: 2px; }
+
+.review-text {
+    color: #d5e4f5;
+    line-height: 1.6;
+    overflow-wrap: anywhere;
+}
+
+.review-date {
+    color: #8daac9;
+    font-size: 12px;
+    margin-top: 12px;
+}
+
+.review-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.approve-btn { background: #15803d; color: white; }
+.reject-btn { background: #b91c1c; color: white; }
+
+/* SUPPORT TICKET SECTION */
+
+.tickets-panel {
+    margin-top: 35px;
+    scroll-margin-top: 25px;
+}
+
+.tickets-panel h2 { color: #60a5fa; }
+
+.tickets-description {
+    color: #9bb7d6;
+    font-size: 13px;
+    margin-top: 8px;
+    margin-bottom: 22px;
+    line-height: 1.6;
+}
+
+.ticket-stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 15px;
+    margin-bottom: 22px;
+}
+
+.ticket-stat {
+    background: rgba(7,25,45,.8);
+    border: 1px solid rgba(96,165,250,.2);
+    border-radius: 12px;
+    padding: 18px;
+}
+
+.ticket-stat p {
+    color: #a9c6e8;
+    font-size: 13px;
+}
+
+.ticket-stat h3 {
+    color: #60a5fa;
+    font-size: 27px;
+    margin-top: 9px;
+}
+
+.ticket-tools {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 12px;
+    margin-bottom: 18px;
+}
+
+.ticket-tools input { margin-bottom: 0; }
+
+.ticket-search-btn {
+    background: #164e80;
+    color: white;
+}
+
+.ticket-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 9px;
+    margin-bottom: 20px;
+}
+
+.ticket-tab {
+    background: #142d4a;
+    color: #cbdcf0;
+    border: 1px solid #31577e;
+}
+
+.ticket-tab.active {
+    background: #2563eb;
+    color: white;
+}
+
+.ticket-card {
+    background: rgba(7,25,45,.8);
+    border: 1px solid rgba(96,165,250,.2);
+    border-radius: 14px;
+    padding: 20px;
+    margin-bottom: 17px;
+}
+
+.ticket-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 17px;
+}
+
+.ticket-card-header h3 {
+    color: #bfdbfe;
+    margin-bottom: 6px;
+    overflow-wrap: anywhere;
+}
+
+.ticket-date {
+    color: #8daac9;
+    font-size: 12px;
+}
+
+.ticket-status {
+    padding: 6px 11px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 700;
+    background: #164e80;
+    color: #bfdbfe;
+}
+
+.ticket-status.open { background: #713f12; color: #fde68a; }
+.ticket-status.in-progress { background: #164e80; color: #bfdbfe; }
+.ticket-status.resolved { background: #14532d; color: #bbf7d0; }
+.ticket-status.closed { background: #374151; color: #e5e7eb; }
+
+.ticket-details {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.ticket-detail {
+    background: rgba(17,38,65,.75);
+    border-radius: 8px;
+    padding: 12px;
+    min-width: 0;
+}
+
+.ticket-detail span {
+    display: block;
+    color: #8daac9;
+    font-size: 11px;
+    margin-bottom: 5px;
+}
+
+.ticket-detail strong {
+    color: #eaf2ff;
+    font-size: 13px;
+    overflow-wrap: anywhere;
+}
+
+.ticket-description-box {
+    background: rgba(17,38,65,.75);
+    border-radius: 8px;
+    padding: 14px;
+    margin-bottom: 18px;
+}
+
+.ticket-description-box span {
+    display: block;
+    color: #8daac9;
+    font-size: 11px;
+    margin-bottom: 7px;
+}
+
+.ticket-description-box p {
+    color: #eaf2ff;
+    font-size: 13px;
+    line-height: 1.6;
+    overflow-wrap: anywhere;
+    white-space: pre-wrap;
+}
+
+.ticket-edit-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 13px;
+}
+
+.ticket-edit-group label {
+    display: block;
+    color: #bfdbfe;
+    font-size: 12px;
+    margin-bottom: 7px;
+}
+
+.ticket-edit-group input,
+.ticket-edit-group select,
+.ticket-edit-group textarea {
+    margin-bottom: 0;
+}
+
+.ticket-edit-group.full-width { grid-column: 1 / -1; }
+
+.ticket-update-btn {
+    background: linear-gradient(135deg, #2563eb, #38bdf8);
+    color: white;
+    width: 100%;
+    margin-top: 15px;
+}
+
+.empty-message {
+    text-align: center;
+    padding: 35px 15px;
+    color: #9bb7d6;
+}
+
+.status-message {
+    text-align: center;
+    margin-top: 12px;
+    font-size: 13px;
+    color: #93c5fd;
+    min-height: 18px;
+    overflow-wrap: anywhere;
+}
+
+.hidden { display: none !important; }
+
+.dashboard-footer {
+    text-align: center;
+    padding: 22px 15px;
+    margin-top: 40px;
+    color: #94a3b8;
+    font-size: 13px;
+    border-top: 1px solid rgba(255,255,255,.08);
+    letter-spacing: .5px;
+}
+
+@media (max-width: 800px) {
+    .stats, .ticket-stats { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 520px) {
+    body { padding: 20px 4%; }
+
+    .stats, .ticket-stats {
+        grid-template-columns: repeat(2,1fr);
+        gap: 10px;
+    }
+
+    .stat-card { padding: 16px; }
+    .stat-card h2 { font-size: 25px; }
+
+    .stat-icon { width: 40px; height: 40px; }
+    .stat-icon svg { width: 21px; height: 21px; }
+
+    .glass { padding: 18px; }
+    .dashboard-header { align-items: flex-start; }
+    .header-actions { width: 100%; }
+
+    .ticket-tools { grid-template-columns: 1fr; }
+    .ticket-details, .ticket-edit-grid { grid-template-columns: 1fr; }
+
+    .ticket-edit-group.full-width { grid-column: 1; }
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<div class="brand">
+    <h1>RADHA COMPUTERS</h1>
+    <p>SALES AND SERVICE</p>
+</div>
+
+<!-- LOGIN -->
+
+<div id="loginSection" class="glass login-box">
+    <h2>Admin Login</h2>
+
+    <form id="loginForm">
+        <input type="email" id="email" placeholder="Admin Email" required>
+        <input type="password" id="password" placeholder="Password" required>
+
+        <button type="submit" class="primary-btn login-btn">
+            Login to Dashboard
+        </button>
+    </form>
+
+    <p id="loginMessage" class="status-message"></p>
+</div>
+
+<!-- DASHBOARD -->
+
+<div id="dashboardSection" class="hidden">
+
+    <div class="dashboard-header">
+        <h2>Admin Dashboard</h2>
+
+        <div class="header-actions">
+            <button id="refreshBtn" class="refresh-btn">↻ Refresh</button>
+            <button id="logoutBtn" class="logout-btn">Logout</button>
+        </div>
+    </div>
+
+    <!-- REVIEW STATISTICS -->
+
+    <div class="stats">
+
+        <div class="stat-card" data-status="all">
+            <div class="stat-top">
+                <p>Total Reviews</p>
+                <div class="stat-icon icon-total">
+                    <i data-lucide="messages-square"></i>
+                </div>
+            </div>
+            <h2 id="totalCount">0</h2>
+            <span class="stat-hint">Click to view all reviews →</span>
+        </div>
+
+        <div class="stat-card" data-status="pending">
+            <div class="stat-top">
+                <p>Pending Reviews</p>
+                <div class="stat-icon icon-pending">
+                    <i data-lucide="clock"></i>
+                </div>
+            </div>
+            <h2 id="pendingCount">0</h2>
+            <span class="stat-hint">Click to review pending →</span>
+        </div>
+
+        <div class="stat-card" data-status="approved">
+            <div class="stat-top">
+                <p>Approved Reviews</p>
+                <div class="stat-icon icon-approved">
+                    <i data-lucide="check-circle"></i>
+                </div>
+            </div>
+            <h2 id="approvedCount">0</h2>
+            <span class="stat-hint">Click to view approved →</span>
+        </div>
+
+        <div class="stat-card" data-status="rejected">
+            <div class="stat-top">
+                <p>Rejected Reviews</p>
+                <div class="stat-icon icon-rejected">
+                    <i data-lucide="x-circle"></i>
+                </div>
+            </div>
+            <h2 id="rejectedCount">0</h2>
+            <span class="stat-hint">Click to view rejected →</span>
+        </div>
+
+    </div>
+
+    <!-- CUSTOMER REVIEWS -->
+
+    <div class="glass reviews-panel" id="reviewsPanel">
+
+        <div class="reviews-heading">
+            <h2 id="reviewsTitle">Customer Reviews</h2>
+        </div>
+
+        <div class="tabs">
+            <button class="tab-btn active" data-status="pending">Pending</button>
+            <button class="tab-btn" data-status="approved">Approved</button>
+            <button class="tab-btn" data-status="rejected">Rejected</button>
+        </div>
+
+        <div id="reviewsContainer">
+            <p class="empty-message">Loading reviews...</p>
+        </div>
+
+        <p id="dashboardMessage" class="status-message"></p>
+
+    </div>
+
+    <!-- SUPPORT TICKET MANAGEMENT -->
+
+    <div class="glass tickets-panel" id="ticketsPanel">
+
+        <h2><i data-lucide="headset"></i> Support Ticket Management</h2>
+
+        <p class="tickets-description">
+            View customer service requests, update ticket progress,
+            assign technicians and manage service priorities.
+        </p>
+
+        <div class="ticket-stats">
+
+            <div class="ticket-stat">
+                <p>Total Tickets</p>
+                <h3 id="ticketTotalCount">0</h3>
+            </div>
+
+            <div class="ticket-stat">
+                <p>Open Tickets</p>
+                <h3 id="ticketOpenCount">0</h3>
+            </div>
+
+            <div class="ticket-stat">
+                <p>In Progress</p>
+                <h3 id="ticketProgressCount">0</h3>
+            </div>
+
+            <div class="ticket-stat">
+                <p>Resolved</p>
+                <h3 id="ticketResolvedCount">0</h3>
+            </div>
+
+        </div>
+
+        <div class="ticket-tools">
+            <input
+                type="search"
+                id="ticketSearch"
+                placeholder="Search Ticket ID, customer name or mobile..."
+            >
+
+            <button class="ticket-search-btn" id="ticketSearchBtn">
+                Search Tickets
+            </button>
+        </div>
+
+        <div class="ticket-tabs">
+
+            <button class="ticket-tab active" data-ticket-status="all">
+                All Tickets
+            </button>
+
+            <button class="ticket-tab" data-ticket-status="Open">
+                Open
+            </button>
+
+            <button class="ticket-tab" data-ticket-status="In Progress">
+                In Progress
+            </button>
+
+            <button class="ticket-tab" data-ticket-status="Resolved">
+                Resolved
+            </button>
+
+            <button class="ticket-tab" data-ticket-status="Closed">
+                Closed
+            </button>
+
+        </div>
+
+        <div id="ticketsContainer">
+            <p class="empty-message">Loading support tickets...</p>
+        </div>
+
+        <p id="ticketDashboardMessage" class="status-message"></p>
+
+    </div>
+
+</div>
+
+</div>
+
+<footer class="dashboard-footer">
+    © 2026 Radha Computers. All Rights Reserved.
+</footer>
+
+<script>
+
+// ==========================================
+// SUPABASE CONFIGURATION
+// ==========================================
+
+const SUPABASE_URL = "https://jngcjiypnmodqvktyqwo.supabase.co";
+const SUPABASE_KEY = "sb_publishable_frGSI3_yo1ixaWG4zezMzg_M6wwUhvt";
+
+const ADMIN_ID = "0258d353-73ae-42d8-9f55-07fea80c1315";
+
+const supabaseClient = window.supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_KEY
+);
+
+// ==========================================
+// ELEMENTS
+// ==========================================
+
+const loginSection = document.getElementById("loginSection");
+const dashboardSection = document.getElementById("dashboardSection");
+const loginForm = document.getElementById("loginForm");
+const loginMessage = document.getElementById("loginMessage");
+
+const dashboardMessage = document.getElementById("dashboardMessage");
+const reviewsContainer = document.getElementById("reviewsContainer");
+const reviewsTitle = document.getElementById("reviewsTitle");
+
+const ticketsContainer = document.getElementById("ticketsContainer");
+const ticketDashboardMessage = document.getElementById("ticketDashboardMessage");
+const ticketSearch = document.getElementById("ticketSearch");
+
+// ==========================================
+// APPLICATION STATE
+// ==========================================
+
+let currentStatus = "pending";
+let currentTicketStatus = "all";
+
+let allTickets = [];
+
+let isRefreshing = false;
+let isLoadingTickets = false;
+
+// ==========================================
+// ICONS
+// ==========================================
+
+function renderIcons() {
+    if (window.lucide) {
+        window.lucide.createIcons();
+    }
+}
+
+// ==========================================
+// LOGIN
+// ==========================================
+
+loginForm.addEventListener("submit", async function(event) {
+
+    event.preventDefault();
+
+    loginMessage.textContent = "Checking login...";
+
+    const email = document.getElementById("email").value.trim();
+    const password = document.getElementById("password").value;
+
+    try {
+
+        const { data, error } = await supabaseClient.auth.signInWithPassword({
+            email: email,
+            password: password
+        });
+
+        if (error) throw error;
+
+        if (!data.user || data.user.id !== ADMIN_ID) {
+
+            await supabaseClient.auth.signOut();
+
+            loginMessage.textContent = "Access denied. Admin account only.";
+
+            return;
+        }
+
+        loginMessage.textContent = "";
+
+        await showDashboard();
+
+    } catch (error) {
+
+        loginMessage.textContent = error.message || "Login failed.";
+
+    }
+
+});
+
+// ==========================================
+// CHECK EXISTING SESSION
+// ==========================================
+
+async function checkSession() {
+
+    const { data, error } = await supabaseClient.auth.getSession();
+
+    if (error) {
+        console.error(error);
+        return;
+    }
+
+    if (data.session) {
+
+        if (data.session.user.id === ADMIN_ID) {
+
+            await showDashboard();
+
+        } else {
+
+            await supabaseClient.auth.signOut();
+
+        }
+
+    }
+
+}
+
+// ==========================================
+// SHOW DASHBOARD
+// ==========================================
+
+async function showDashboard() {
+
+    loginSection.classList.add("hidden");
+    dashboardSection.classList.remove("hidden");
+
+    renderIcons();
+
+    await Promise.all([
+        loadDashboard(),
+        loadTickets()
+    ]);
+
+}
+
+// ==========================================
+// LOAD REVIEW DASHBOARD
+// ==========================================
+
+async function loadDashboard() {
+
+    if (isRefreshing) return;
+
+    isRefreshing = true;
+
+    dashboardMessage.textContent = "Refreshing reviews...";
+
+    try {
+
+        const { data, error } = await supabaseClient
+            .from("testimonials")
+            .select("*")
+            .order("created_at", { ascending: false });
+
+        if (error) throw error;
+
+        const reviews = data || [];
+
+        const pending = reviews.filter(r => r.status === "pending");
+        const approved = reviews.filter(r => r.status === "approved");
+        const rejected = reviews.filter(r => r.status === "rejected");
+
+        document.getElementById("totalCount").textContent = reviews.length;
+        document.getElementById("pendingCount").textContent = pending.length;
+        document.getElementById("approvedCount").textContent = approved.length;
+        document.getElementById("rejectedCount").textContent = rejected.length;
+
+        displayReviews(reviews);
+
+        dashboardMessage.textContent = "Reviews updated successfully.";
+
+    } catch (error) {
+
+        dashboardMessage.textContent = "Review error: " + error.message;
+
+    } finally {
+
+        isRefreshing = false;
+
+    }
+
+}
+
+// ==========================================
+// DISPLAY REVIEWS
+// ==========================================
+
+function displayReviews(reviews) {
+
+    const filteredReviews = currentStatus === "all"
+        ? reviews
+        : reviews.filter(review => review.status === currentStatus);
+
+    reviewsContainer.innerHTML = "";
+
+    const titleMap = {
+        all: "All Customer Reviews",
+        pending: "Pending Customer Reviews",
+        approved: "Approved Customer Reviews",
+        rejected: "Rejected Customer Reviews"
+    };
+
+    reviewsTitle.textContent = titleMap[currentStatus];
+
+    if (filteredReviews.length === 0) {
+
+        const empty = document.createElement("p");
+        empty.className = "empty-message";
+        empty.textContent = "No " +
+            (currentStatus === "all" ? "" : currentStatus + " ") +
+            "reviews available.";
+
+        reviewsContainer.appendChild(empty);
+
+        return;
+    }
+
+    filteredReviews.forEach(review => {
+
+        const card = document.createElement("div");
+        card.className = "review-card";
+
+        const top = document.createElement("div");
+        top.className = "review-top";
+
+        const customerInfo = document.createElement("div");
+
+        const customerName = document.createElement("h3");
+        customerName.textContent = review.customer_name || "Customer";
+
+        const rating = document.createElement("div");
+        rating.className = "stars";
+
+        const ratingValue = Number(review.rating) || 0;
+
+        rating.textContent = "★".repeat(
+            Math.max(0, Math.min(5, ratingValue))
+        );
+
+        customerInfo.appendChild(customerName);
+        customerInfo.appendChild(rating);
+
+        const status = document.createElement("span");
+        status.textContent = (review.status || "").toUpperCase();
+
+        status.style.color =
+            review.status === "approved" ? "#4ade80" :
+            review.status === "rejected" ? "#f87171" :
+            "#facc15";
+
+        top.appendChild(customerInfo);
+        top.appendChild(status);
+
+        const feedback = document.createElement("p");
+        feedback.className = "review-text";
+        feedback.textContent = review.feedback || "";
+
+        const date = document.createElement("p");
+        date.className = "review-date";
+
+        date.textContent = review.created_at
+            ? new Date(review.created_at).toLocaleString("en-IN")
+            : "";
+
+        card.appendChild(top);
+        card.appendChild(feedback);
+        card.appendChild(date);
+
+        if (review.status === "pending") {
+
+            const actions = document.createElement("div");
+            actions.className = "review-actions";
+
+            const approveButton = document.createElement("button");
+            approveButton.className = "approve-btn";
+            approveButton.textContent = "✓ Approve";
+
+            approveButton.addEventListener("click", function() {
+                updateReviewStatus(review.id, "approved");
+            });
+
+            const rejectButton = document.createElement("button");
+            rejectButton.className = "reject-btn";
+            rejectButton.textContent = "✕ Reject";
+
+            rejectButton.addEventListener("click", function() {
+                updateReviewStatus(review.id, "rejected");
+            });
+
+            actions.appendChild(approveButton);
+            actions.appendChild(rejectButton);
+
+            card.appendChild(actions);
+
+        }
+
+        reviewsContainer.appendChild(card);
+
+    });
+
+}
+
+// ==========================================
+// REVIEW TABS
+// ==========================================
+
+function switchReviewTab(status, shouldScroll = false) {
+
+    currentStatus = status;
+
+    document.querySelectorAll(".tab-btn").forEach(button => {
+
+        button.classList.toggle(
+            "active",
+            button.dataset.status === status
+        );
+
+    });
+
+    loadDashboard();
+
+    if (shouldScroll) {
+
+        document.getElementById("reviewsPanel").scrollIntoView({
+            behavior: "smooth",
+            block: "start"
+        });
+
+    }
+
+}
+
+document.querySelectorAll(".tab-btn").forEach(button => {
+
+    button.addEventListener("click", function() {
+        switchReviewTab(this.dataset.status);
+    });
+
+});
+
+document.querySelectorAll(".stat-card").forEach(card => {
+
+    card.addEventListener("click", function() {
+        switchReviewTab(this.dataset.status, true);
+    });
+
+});
+
+// ==========================================
+// UPDATE REVIEW STATUS
+// ==========================================
+
+async function updateReviewStatus(reviewId, newStatus) {
+
+    dashboardMessage.textContent = "Updating review...";
+
+    const { error } = await supabaseClient
+        .from("testimonials")
+        .update({ status: newStatus })
+        .eq("id", reviewId);
+
+    if (error) {
+
+        dashboardMessage.textContent = "Update failed: " + error.message;
+
+        return;
+    }
+
+    dashboardMessage.textContent = "Review " + newStatus + " successfully.";
+
+    await loadDashboard();
+
+}
+
+// ==========================================
+// LOAD SUPPORT TICKETS
+// ==========================================
+
+async function loadTickets() {
+
+    if (isLoadingTickets) return;
+
+    isLoadingTickets = true;
+
+    ticketDashboardMessage.textContent = "Loading support tickets...";
+
+    try {
+
+        const { data, error } = await supabaseClient
+            .from("support_tickets")
+            .select("*")
+            .order("created_at", { ascending: false });
+
+        if (error) throw error;
+
+        allTickets = data || [];
+
+        updateTicketStatistics();
+
+        displayTickets();
+
+        ticketDashboardMessage.textContent =
+            "Support tickets updated successfully.";
+
+    } catch (error) {
+
+        console.error("Ticket loading error:", error);
+
+        ticketDashboardMessage.textContent =
+            "Unable to load tickets: " + error.message;
+
+        ticketsContainer.innerHTML = "";
+
+        const message = document.createElement("p");
+        message.className = "empty-message";
+        message.textContent = "Ticket loading failed. Check admin permissions.";
+
+        ticketsContainer.appendChild(message);
+
+    } finally {
+
+        isLoadingTickets = false;
+
+    }
+
+}
+
+// ==========================================
+// TICKET STATISTICS
+// ==========================================
+
+function updateTicketStatistics() {
+
+    document.getElementById("ticketTotalCount").textContent =
+        allTickets.length;
+
+    document.getElementById("ticketOpenCount").textContent =
+        allTickets.filter(t => t.status === "Open").length;
+
+    document.getElementById("ticketProgressCount").textContent =
+        allTickets.filter(t => t.status === "In Progress").length;
+
+    document.getElementById("ticketResolvedCount").textContent =
+        allTickets.filter(t => t.status === "Resolved").length;
+
+}
+
+// ==========================================
+// DISPLAY SUPPORT TICKETS
+// ==========================================
+
+function displayTickets() {
+
+    ticketsContainer.innerHTML = "";
+
+    const searchTerm = ticketSearch.value.trim().toLowerCase();
+
+    const filteredTickets = allTickets.filter(ticket => {
+
+        const matchesStatus =
+            currentTicketStatus === "all" ||
+            ticket.status === currentTicketStatus;
+
+        const searchableText = [
+            ticket.ticket_id,
+            ticket.customer_name,
+            ticket.mobile,
+            ticket.email,
+            ticket.device_type,
+            ticket.issue_category
+        ].join(" ").toLowerCase();
+
+        const matchesSearch = !searchTerm ||
+            searchableText.includes(searchTerm);
+
+        return matchesStatus && matchesSearch;
+
+    });
+
+    if (filteredTickets.length === 0) {
+
+        const empty = document.createElement("p");
+        empty.className = "empty-message";
+        empty.textContent = "No matching support tickets found.";
+
+        ticketsContainer.appendChild(empty);
+
+        return;
+    }
+
+    filteredTickets.forEach(ticket => {
+
+        const card = document.createElement("div");
+        card.className = "ticket-card";
+
+        // HEADER
+
+        const header = document.createElement("div");
+        header.className = "ticket-card-header";
+
+        const headingGroup = document.createElement("div");
+
+        const heading = document.createElement("h3");
+        heading.textContent = ticket.ticket_id;
+
+        const date = document.createElement("p");
+        date.className = "ticket-date";
+
+        date.textContent = ticket.created_at
+            ? "Submitted: " + new Date(ticket.created_at).toLocaleString("en-IN")
+            : "";
+
+        headingGroup.appendChild(heading);
+        headingGroup.appendChild(date);
+
+        const statusBadge = document.createElement("span");
+
+        statusBadge.className =
+            "ticket-status " +
+            ticket.status.toLowerCase().replace(/\s+/g, "-");
+
+        statusBadge.textContent = ticket.status;
+
+        header.appendChild(headingGroup);
+        header.appendChild(statusBadge);
+
+        card.appendChild(header);
+
+        // CUSTOMER DETAILS
+
+        const details = document.createElement("div");
+        details.className = "ticket-details";
+
+        function addDetail(label, value) {
+
+            const detail = document.createElement("div");
+            detail.className = "ticket-detail";
+
+            const labelElement = document.createElement("span");
+            labelElement.textContent = label;
+
+            const valueElement = document.createElement("strong");
+            valueElement.textContent =
+                value === null || value === undefined || value === ""
+                    ? "Not provided"
+                    : String(value);
+
+            detail.appendChild(labelElement);
+            detail.appendChild(valueElement);
+
+            details.appendChild(detail);
+
+        }
+
+        addDetail("Customer Name", ticket.customer_name);
+        addDetail("Mobile Number", ticket.mobile);
+        addDetail("Email Address", ticket.email);
+        addDetail("Device", ticket.device_type);
+        addDetail("Issue Category", ticket.issue_category);
+        addDetail("Service Type", ticket.service_type);
+
+        card.appendChild(details);
+
+        // ISSUE DESCRIPTION
+
+        const descriptionBox = document.createElement("div");
+        descriptionBox.className = "ticket-description-box";
+
+        const descriptionLabel = document.createElement("span");
+        descriptionLabel.textContent = "CUSTOMER ISSUE DESCRIPTION";
+
+        const descriptionText = document.createElement("p");
+        descriptionText.textContent = ticket.description || "No description provided.";
+
+        descriptionBox.appendChild(descriptionLabel);
+        descriptionBox.appendChild(descriptionText);
+
+        card.appendChild(descriptionBox);
+
+        // EDIT FORM
+
+        const editGrid = document.createElement("div");
+        editGrid.className = "ticket-edit-grid";
+
+        function createField(label, className) {
+
+            const group = document.createElement("div");
+            group.className = "ticket-edit-group " + (className || "");
+
+            const fieldLabel = document.createElement("label");
+            fieldLabel.textContent = label;
+
+            group.appendChild(fieldLabel);
+
+            return group;
+
+        }
+
+        // STATUS
+
+        const statusGroup = createField("Ticket Status");
+
+        const statusSelect = document.createElement("select");
+
+        ["Open", "In Progress", "Resolved", "Closed"].forEach(status => {
+
+            const option = document.createElement("option");
+            option.value = status;
+            option.textContent = status;
+
+            statusSelect.appendChild(option);
+
+        });
+
+        statusSelect.value = ticket.status || "Open";
+
+        statusGroup.appendChild(statusSelect);
+        editGrid.appendChild(statusGroup);
+
+        // PRIORITY
+
+        const priorityGroup = createField("Priority");
+
+        const prioritySelect = document.createElement("select");
+
+        ["Low", "Normal", "High", "Urgent"].forEach(priority => {
+
+            const option = document.createElement("option");
+            option.value = priority;
+            option.textContent = priority;
+
+            prioritySelect.appendChild(option);
+
+        });
+
+        prioritySelect.value = ticket.priority || "Normal";
+
+        priorityGroup.appendChild(prioritySelect);
+        editGrid.appendChild(priorityGroup);
+
+        // TECHNICIAN
+
+        const technicianGroup = createField("Assign Technician");
+
+        const technicianInput = document.createElement("input");
+
+        technicianInput.type = "text";
+        technicianInput.placeholder = "Enter technician name";
+        technicianInput.value = ticket.technician || "";
+
+        technicianGroup.appendChild(technicianInput);
+        editGrid.appendChild(technicianGroup);
+
+        // ADMIN NOTES
+
+        const notesGroup = createField("Internal Admin Notes", "full-width");
+
+        const notesInput = document.createElement("textarea");
+
+        notesInput.placeholder = "Enter internal notes (not visible to customers)";
+        notesInput.value = ticket.admin_notes || "";
+
+        notesGroup.appendChild(notesInput);
+        editGrid.appendChild(notesGroup);
+
+        card.appendChild(editGrid);
+
+        // UPDATE BUTTON
+
+        const updateButton = document.createElement("button");
+
+        updateButton.className = "ticket-update-btn";
+        updateButton.textContent = "Save Ticket Updates";
+
+        updateButton.addEventListener("click", async function() {
+
+            updateButton.disabled = true;
+            updateButton.textContent = "Saving Changes...";
+
+            ticketDashboardMessage.textContent =
+                "Updating ticket " + ticket.ticket_id + "...";
+
+            try {
+
+                const { error } = await supabaseClient
+                    .from("support_tickets")
+                    .update({
+                        status: statusSelect.value,
+                        priority: prioritySelect.value,
+                        technician: technicianInput.value.trim() || null,
+                        admin_notes: notesInput.value.trim() || null,
+                        updated_at: new Date().toISOString()
+                    })
+                    .eq("id", ticket.id);
+
+                if (error) throw error;
+
+                ticketDashboardMessage.textContent =
+                    "Ticket " + ticket.ticket_id + " updated successfully.";
+
+                await loadTickets();
+
+            } catch (error) {
+
+                console.error("Ticket update error:", error);
+
+                ticketDashboardMessage.textContent =
+                    "Unable to update ticket: " + error.message;
+
+            } finally {
+
+                updateButton.disabled = false;
+                updateButton.textContent = "Save Ticket Updates";
+
+            }
+
+        });
+
+        card.appendChild(updateButton);
+
+        ticketsContainer.appendChild(card);
+
+    });
+
+}
+
+// ==========================================
+// TICKET FILTER TABS
+// ==========================================
+
+document.querySelectorAll(".ticket-tab").forEach(button => {
+
+    button.addEventListener("click", function() {
+
+        currentTicketStatus = this.dataset.ticketStatus;
+
+        document.querySelectorAll(".ticket-tab").forEach(tab => {
+            tab.classList.remove("active");
+        });
+
+        this.classList.add("active");
+
+        displayTickets();
+
+    });
+
+});
+
+// ==========================================
+// TICKET SEARCH
+// ==========================================
+
+ticketSearch.addEventListener("input", displayTickets);
+
+document.getElementById("ticketSearchBtn").addEventListener("click", function() {
+    displayTickets();
+});
+
+// ==========================================
+// MANUAL REFRESH
+// ==========================================
+
+document.getElementById("refreshBtn").addEventListener("click", async function() {
+
+    const refreshButton = this;
+
+    refreshButton.disabled = true;
+    refreshButton.textContent = "Refreshing...";
+
+    try {
+
+        await Promise.all([
+            loadDashboard(),
+            loadTickets()
+        ]);
+
+    } finally {
+
+        refreshButton.disabled = false;
+        refreshButton.textContent = "↻ Refresh";
+
+    }
+
+});
+
+// ==========================================
+// LOGOUT
+// ==========================================
+
+document.getElementById("logoutBtn").addEventListener("click", async function() {
+
+    await supabaseClient.auth.signOut();
+
+    dashboardSection.classList.add("hidden");
+    loginSection.classList.remove("hidden");
+
+    loginForm.reset();
+
+    loginMessage.textContent = "You have logged out successfully.";
+
+});
+
+// ==========================================
+// START APPLICATION
+// ==========================================
+
+checkSession();
+
+</script>
+
+</body>
+</html>
