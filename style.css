@@ -3024,17 +3024,19 @@ a {
     pointer-events: none;
 }
 
+
 .new-hero-slide:nth-child(1) {
-    background-image: url("images/hero-background.png");
+    background-image: url("/hero-background.png");
 }
 
 .new-hero-slide:nth-child(2) {
-    background-image: url("images/slide-2-laptop.jpg");
+    background-image: url("/slide-2-laptop.png");
 }
 
 .new-hero-slide:nth-child(3) {
-    background-image: url("images/slide-3-repair.jpg");
+    background-image: url("/slide-3-repair.png");
 }
+
 
 .new-hero-slide .new-hero-content {
     position: relative;
